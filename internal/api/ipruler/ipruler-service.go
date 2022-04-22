@@ -2,8 +2,6 @@ package ipruler
 
 import (
 	"context"
-	_ "embed"
-	"encoding/json"
 	"net"
 	"net/url"
 	"runtime"
@@ -16,7 +14,8 @@ import (
 	"github.com/thataway/common-lib/server"
 	netPrivate "github.com/thataway/ipruler/internal/pkg/net"
 	"github.com/thataway/ipruler/internal/pkg/netlink"
-	"github.com/thataway/ipruler/pkg/ipruler"
+	apiUtils "github.com/thataway/protos/pkg/api"
+	"github.com/thataway/protos/pkg/api/ipruler"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
@@ -37,21 +36,13 @@ func NewIPRulerService(ctx context.Context) server.APIService {
 	return ret
 }
 
-//GetSwaggerDocs get swagger spec docs
-func GetSwaggerDocs() (*server.SwaggerSpec, error) {
-	const api = "ip-ruler/GetSwaggerDocs"
-	ret := new(server.SwaggerSpec)
-	err := json.Unmarshal(rawSwagger, ret)
-	return ret, errors.Wrap(err, api)
-}
-
 var (
 	_ ipruler.IPRulerServiceServer = (*iprulerService)(nil)
 	_ server.APIService            = (*iprulerService)(nil)
 	_ server.APIGatewayProxy       = (*iprulerService)(nil)
 
-	//go:embed ipruler.swagger.json
-	rawSwagger []byte
+	//GetSwaggerDocs get swagger spec docs
+	GetSwaggerDocs = apiUtils.Ipruler.LoadSwagger
 )
 
 const (
